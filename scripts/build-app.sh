@@ -3,11 +3,20 @@ set -euo pipefail
 
 script_dir=$(cd "$(dirname "$0")" && pwd -P)
 repository_root=$(cd "$script_dir/.." && pwd -P)
-app_path="$repository_root/dist/MDReader.app"
+final_app_path="$repository_root/dist/MDReader.app"
+temporary_root=$(mktemp -d "${TMPDIR:-/tmp}/mdreader-app.XXXXXX")
+app_path="$temporary_root/MDReader.app"
 contents_path="$app_path/Contents"
 executable_path="$repository_root/.build/release/MDReader"
 resource_destination="$contents_path/Resources/MDReader_MDReaderKit.bundle"
 icon_path="$repository_root/Assets/MDReader.icns"
+
+cleanup() {
+  if [[ -d "$temporary_root" && "$temporary_root" == "${TMPDIR:-/tmp}/mdreader-app."* ]]; then
+    rm -rf "$temporary_root"
+  fi
+}
+trap cleanup EXIT
 
 cd "$repository_root"
 
@@ -33,14 +42,6 @@ if [[ -z "$resource_bundle" || "$resource_bundle" != "$repository_root/.build/"*
   exit 1
 fi
 
-if [[ -e "$app_path" ]]; then
-  if [[ "$app_path" != "$repository_root/dist/MDReader.app" ]]; then
-    printf 'Refusing to replace unexpected app path: %s\n' "$app_path" >&2
-    exit 1
-  fi
-  rm -rf "$app_path"
-fi
-
 mkdir -p "$contents_path/MacOS" "$contents_path/Resources"
 cp "$executable_path" "$contents_path/MacOS/MDReader"
 chmod 755 "$contents_path/MacOS/MDReader"
@@ -52,8 +53,7 @@ printf 'APPL????' > "$contents_path/PkgInfo"
 bundle_identifier=$(plutil -extract CFBundleIdentifier raw "$contents_path/Info.plist")
 signed=false
 for _ in 1 2 3; do
-  # File Provider may reattach Finder metadata immediately after a bundle is
-  # created inside Documents. Clear it immediately before each signing try.
+  # Clear metadata inherited from source files immediately before signing.
   xattr -cr "$app_path"
   if codesign --force --sign - --identifier "$bundle_identifier" "$app_path"; then
     signed=true
@@ -77,4 +77,15 @@ if [[ "$verified" != true ]]; then
   exit 1
 fi
 
-printf 'Built %s\n' "$app_path"
+if [[ "$final_app_path" != "$repository_root/dist/MDReader.app" ]]; then
+  printf 'Refusing to replace unexpected app path: %s\n' "$final_app_path" >&2
+  exit 1
+fi
+if [[ -e "$final_app_path" ]]; then
+  rm -rf "$final_app_path"
+fi
+mkdir -p "$(dirname "$final_app_path")"
+ditto --noextattr --noqtn "$app_path" "$final_app_path"
+"$repository_root/scripts/verify-app.sh" "$final_app_path"
+
+printf 'Built %s\n' "$final_app_path"

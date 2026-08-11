@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-26
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Validate the release version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_version=${GITHUB_REF_NAME#v}
+          app_version=$(plutil -extract CFBundleShortVersionString raw Config/Info.plist)
+          if [[ "$tag_version" != "$app_version" ]]; then
+            printf 'Tag version %s does not match app version %s.\n' "$tag_version" "$app_version" >&2
+            exit 1
+          fi
+
+      - name: Build and verify the disk image
+        run: bash scripts/build-dmg.sh
+
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=${GITHUB_REF_NAME#v}
+          dmg_path="release/MDReader-$version.dmg"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$dmg_path" release/SHA256SUMS --clobber
+          else
+            release_notes=$'Download the DMG, open it, and drag MDReader to Applications.\n\nThis build is ad hoc signed and is not notarized with an Apple Developer ID. On first launch, Control-click MDReader in Applications, choose Open, and confirm Open. See the README for complete installation and checksum instructions.'
+            gh release create "$GITHUB_REF_NAME" \
+              "$dmg_path" \
+              release/SHA256SUMS \
+              --title "MDReader $version" \
+              --notes "$release_notes" \
+              --generate-notes \
+              --verify-tag
+          fi

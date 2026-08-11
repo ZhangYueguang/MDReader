@@ -33,7 +33,18 @@ For changes that affect packaging or resources, also run:
 ```bash
 bash scripts/build-app.sh
 bash scripts/run-smoke-test.sh Tests/Fixtures/Showcase.md
+bash scripts/build-dmg.sh --skip-build
+bash scripts/verify-dmg.sh release/MDReader-1.0.0.dmg
+(cd release && shasum -a 256 -c SHA256SUMS)
 ```
+
+Running `scripts/build-dmg.sh` without `--skip-build` performs the complete application build before packaging. The generated `release/` directory is intentionally excluded from Git; published binaries belong in GitHub Releases.
+
+## Release Packaging
+
+The application version in `Config/Info.plist`, the package version in `package.json`, and the Git tag must match. Pushing a tag such as `v1.0.0` starts the Release workflow, which builds and verifies the DMG and publishes both `MDReader-1.0.0.dmg` and `SHA256SUMS`.
+
+Public releases must accurately state their signing status. Do not describe a build as Developer ID signed or notarized unless the corresponding Apple verification has succeeded.
 
 ## Pull Requests
 

@@ -10,6 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/ZhangYueguang/MDReader/actions/workflows/ci.yml"><img src="https://github.com/ZhangYueguang/MDReader/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://github.com/ZhangYueguang/MDReader/releases/latest"><img src="https://img.shields.io/github/v/release/ZhangYueguang/MDReader?color=315d71" alt="Latest release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-315d71" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-315d71" alt="macOS 14 or later">
   <img src="https://img.shields.io/badge/Swift-6.2-f05138" alt="Swift 6.2">
@@ -30,13 +31,41 @@ MDReader focuses on one job: presenting local Markdown files accurately and beau
 - Light and warm-charcoal dark appearances that follow macOS automatically.
 - Fully bundled rendering assets for offline text, code, local images, and math.
 
-## Requirements
+## Download
 
-- macOS 14 or later
-- Swift 6.2 or later
-- Node.js 24
+**[Download MDReader 1.0.0 for macOS (.dmg)](https://github.com/ZhangYueguang/MDReader/releases/latest/download/MDReader-1.0.0.dmg)**
+
+[View release notes and previous versions](https://github.com/ZhangYueguang/MDReader/releases).
+
+The prebuilt application requires macOS 14 or later. You do not need Swift, Node.js, or any other developer tools.
+
+### Install
+
+1. Download `MDReader-1.0.0.dmg` from the latest release.
+2. Open the disk image.
+3. Drag **MDReader** onto the **Applications** shortcut.
+4. Eject the MDReader disk image.
+
+### First Launch
+
+The current release is ad hoc signed and is not notarized with an Apple Developer ID. macOS may therefore prevent a normal first launch even though the published checksum and application signature have been verified by the release workflow.
+
+1. Open the Applications folder in Finder.
+2. Control-click **MDReader**, choose **Open**, and then confirm **Open**.
+3. If macOS still blocks the application, try opening it once, then go to **System Settings → Privacy & Security**, scroll down, and choose **Open Anyway**.
+
+Only override macOS security when you downloaded MDReader from this repository and trust the release. See [Apple's guidance for opening software that has not been notarized](https://support.apple.com/en-ca/102445).
+
+Every release includes `SHA256SUMS`. Advanced users can verify the download from Terminal:
+
+```bash
+cd ~/Downloads
+shasum -a 256 -c SHA256SUMS
+```
 
 ## Build from Source
+
+Building MDReader requires macOS 14 or later, Swift 6.2 or later, and Node.js 24.
 
 ```bash
 git clone https://github.com/ZhangYueguang/MDReader.git
@@ -46,6 +75,14 @@ open dist/MDReader.app
 ```
 
 The application is created at `dist/MDReader.app`. Local builds use ad hoc code signing and are not notarized with an Apple Developer ID.
+
+To build the same disk image used by GitHub Releases:
+
+```bash
+bash scripts/build-dmg.sh
+```
+
+The DMG and checksum file are created in `release/`.
 
 ## Open Markdown Files
 
@@ -96,7 +133,7 @@ bash scripts/run-smoke-test.sh Tests/Fixtures/Showcase.md
 
 ## Current Scope
 
-MDReader intentionally does not provide editing, folder navigation, document outlines, search, tabs, automatic file refresh, Mermaid rendering, automatic updates, or notarized binary releases yet.
+MDReader intentionally does not provide editing, folder navigation, document outlines, search, tabs, automatic file refresh, Mermaid rendering, or automatic updates yet.
 
 ## Contributing
 

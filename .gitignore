@@ -6,6 +6,7 @@ docs/superpowers/
 .build/
 node_modules/
 dist/
+release/
 Sources/MDReaderKit/GeneratedResources/*
 !Sources/MDReaderKit/GeneratedResources/.gitkeep
 DerivedData/
