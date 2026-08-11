@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="360" viewBox="0 0 1080 360" role="img" aria-labelledby="title desc">
+  <title id="title">MDReader rendering flow</title>
+  <desc id="desc">Markdown passes through safe parsing and MathJax before becoming a reading page.</desc>
+  <rect width="1080" height="360" fill="#eaf0f3"/>
+  <g fill="none" stroke="#315d71" stroke-width="2">
+    <path d="M300 180h120"/>
+    <path d="M660 180h120"/>
+    <path d="m405 170 15 10-15 10"/>
+    <path d="m765 170 15 10-15 10"/>
+  </g>
+  <g font-family="Avenir Next, sans-serif" text-anchor="middle">
+    <g transform="translate(60 105)">
+      <rect width="240" height="150" rx="8" fill="#f7f9fa" stroke="#dce3e7"/>
+      <text x="120" y="66" fill="#18242c" font-size="27" font-weight="600">Markdown</text>
+      <text x="120" y="101" fill="#64727c" font-size="16">Source document</text>
+    </g>
+    <g transform="translate(420 105)">
+      <rect width="240" height="150" rx="8" fill="#315d71"/>
+      <text x="120" y="66" fill="#f7f9fa" font-size="27" font-weight="600">Safe parsing</text>
+      <text x="120" y="101" fill="#dce3e7" font-size="16">GFM · MathJax</text>
+    </g>
+    <g transform="translate(780 105)">
+      <rect width="240" height="150" rx="8" fill="#f7f9fa" stroke="#dce3e7"/>
+      <text x="120" y="66" fill="#18242c" font-size="27" font-weight="600">Reading page</text>
+      <text x="120" y="101" fill="#64727c" font-size="16">Precise output</text>
+    </g>
+  </g>
+</svg>

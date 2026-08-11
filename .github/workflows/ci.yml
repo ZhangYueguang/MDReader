@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Test the web renderer
+        run: npm test
+
+      - name: Test the macOS application
+        run: swift run MDReaderTests
+
+      - name: Stage bundled web resources
+        run: npm run build:web
+
+      - name: Build the release executable
+        run: swift build -c release --product MDReader

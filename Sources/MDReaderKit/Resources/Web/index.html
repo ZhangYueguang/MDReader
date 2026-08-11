@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" data-state="loading">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' mdreader-resource:; style-src 'unsafe-inline' mdreader-resource:; img-src mdreader-file: https: http: data:; font-src mdreader-resource: data:; worker-src mdreader-resource: blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>MDReader</title>
+  <link rel="stylesheet" href="mdreader-resource://app/reader.css">
+  <script>
+    window.MathJax = {
+      loader: {
+        paths: {
+          mathjax: 'mdreader-resource://mathjax',
+          fonts: 'mdreader-resource://mathjax/output/fonts',
+          'mathjax-newcm': 'mdreader-resource://mathjax/output/fonts/mathjax-newcm'
+        }
+      },
+      startup: {
+        typeset: false
+      },
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        processEscapes: true,
+        packages: {'[+]': ['ams', 'newcommand', 'autoload']}
+      },
+      chtml: {
+        displayAlign: 'center',
+        linebreaks: {automatic: true, width: 'container'},
+        dynamicPrefix: 'mdreader-resource://mathjax/output/fonts/mathjax-newcm/chtml/dynamic',
+        fontURL: 'mdreader-resource://mathjax/output/fonts/mathjax-newcm/chtml/woff2'
+      },
+      options: {
+        enableMenu: false,
+        enableEnrichment: false,
+        enableSpeech: false,
+        enableBraille: false,
+        enableExplorer: false,
+        enableComplexity: false,
+        enableAssistiveMml: false,
+        menuOptions: {
+          settings: {
+            enrich: false,
+            speech: false,
+            braille: false,
+            collapsible: false,
+            assistiveMml: false
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="mdreader-resource://app/renderer.js"></script>
+  <script defer src="mdreader-resource://mathjax/tex-mml-chtml.js"></script>
+  <script defer src="mdreader-resource://app/boot.js"></script>
+</head>
+<body>
+  <main id="reader" aria-live="polite">
+    <div id="loading" class="loading-surface" role="status">
+      <span class="loading-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>Typesetting…</span>
+    </div>
+    <article id="content" class="document" aria-label="Markdown document"></article>
+  </main>
+</body>
+</html>

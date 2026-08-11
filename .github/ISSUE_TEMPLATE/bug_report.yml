@@ -1,0 +1,43 @@
+name: Bug report
+description: Report reproducible incorrect behavior in MDReader.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for taking the time to report a problem.
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: macOS 26.0
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Open a Markdown file containing...
+        2. Resize the window...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Minimal Markdown sample
+      description: Remove private information before attaching content.
+      render: markdown
+  - type: textarea
+    id: logs
+    attributes:
+      label: Additional context
+      description: Add screenshots, crash reports, or other useful details.

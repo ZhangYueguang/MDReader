@@ -1,0 +1,13 @@
+.DS_Store
+.impeccable.md
+.superpowers/
+.worktrees/
+docs/superpowers/
+.build/
+node_modules/
+dist/
+Sources/MDReaderKit/GeneratedResources/*
+!Sources/MDReaderKit/GeneratedResources/.gitkeep
+DerivedData/
+*.xcuserstate
+xcuserdata/
