@@ -5,7 +5,7 @@
 <h1 align="center">MDReader</h1>
 
 <p align="center">
-  A calm, read-only Markdown reader for macOS with refined typography and reliable math rendering.
+  A calm Markdown reader and editor for macOS with refined typography and reliable math rendering.
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/Swift-6.2-f05138" alt="Swift 6.2">
 </p>
 
-MDReader focuses on one job: presenting local Markdown files accurately and beautifully. It never edits the source document. Articles, technical notes, code, tables, images, footnotes, and mathematical notation are rendered in a distraction-free native macOS window.
+MDReader presents local Markdown files accurately and beautifully, then lets you edit the source without leaving the document. Articles, technical notes, code, tables, images, footnotes, and mathematical notation stay readable in a distraction-free native macOS window.
 
 ## Highlights
 
@@ -30,10 +30,14 @@ MDReader focuses on one job: presenting local Markdown files accurately and beau
 - A fluid reading column that grows with the window while preserving comfortable line length.
 - Light and warm-charcoal dark appearances that follow macOS automatically.
 - Fully bundled rendering assets for offline text, code, local images, and math.
+- Explicit Read and Edit modes in every document window.
+- A native source editor with Markdown syntax highlighting, macOS undo and redo, spell checking, and find.
+- A compact formatting bar for headings, emphasis, links, quotes, code, math, and lists.
+- Native autosave and `⌘S`, with original UTF-8, UTF-16, and GB18030 encodings preserved.
 
 ## Download
 
-**[Download MDReader 1.0.0 for macOS (.dmg)](https://github.com/ZhangYueguang/MDReader/releases/latest/download/MDReader-1.0.0.dmg)**
+**[Download MDReader 1.1.0 for macOS (.dmg)](https://github.com/ZhangYueguang/MDReader/releases/latest/download/MDReader-1.1.0.dmg)**
 
 [View release notes and previous versions](https://github.com/ZhangYueguang/MDReader/releases).
 
@@ -41,7 +45,7 @@ The prebuilt application requires macOS 14 or later. You do not need Swift, Node
 
 ### Install
 
-1. Download `MDReader-1.0.0.dmg` from the latest release.
+1. Download `MDReader-1.1.0.dmg` from the latest release.
 2. Open the disk image.
 3. Drag **MDReader** onto the **Applications** shortcut.
 4. Eject the MDReader disk image.
@@ -96,15 +100,27 @@ To open the bundled showcase document:
 open -a dist/MDReader.app Tests/Fixtures/Showcase.md
 ```
 
+## Edit and Save
+
+1. Open a Markdown file and choose **Edit** in the window toolbar.
+2. Edit the Markdown source directly. Syntax highlighting never changes the underlying text.
+3. Use the fixed formatting bar for headings, bold, italic, strikethrough, links, quotes, code, math, and lists.
+4. Choose **Read** to typeset the current in-memory source immediately.
+
+MDReader participates in the native macOS document lifecycle. Changes are autosaved, and `⌘S` saves immediately. Undo, redo, find, spell checking, and standard text editing shortcuts behave like other Mac applications.
+
+Existing UTF-8, UTF-16, and GB18030/GBK files keep their original encoding and byte-order-mark style whenever they are saved. Use **File → Convert to UTF-8** when you intentionally want UTF-8 output.
+
 ## Architecture
 
-MDReader uses a SwiftUI document-based shell and a tightly controlled `WKWebView` rendering surface.
+MDReader uses a SwiftUI document-based shell, a native TextKit editor, and a tightly controlled `WKWebView` rendering surface.
 
-1. Swift reads the source file without exposing write operations and detects its text encoding.
-2. A bundled unified/remark pipeline parses Markdown, applies GFM extensions, and sanitizes embedded HTML.
-3. Highlight.js-compatible output styles code blocks.
-4. Bundled MathJax typesets TeX and MathML after the Markdown structure is ready.
-5. Custom URL schemes expose only packaged resources and images inside the document directory.
+1. Swift decodes the source, preserves its text encoding, and uses the macOS document system for coordinated autosave.
+2. TextKit provides source editing, selection-based formatting, undo, find, and lightweight syntax highlighting.
+3. A bundled unified/remark pipeline parses Markdown, applies GFM extensions, and sanitizes embedded HTML.
+4. Highlight.js-compatible output styles code blocks.
+5. Bundled MathJax typesets TeX and MathML after the Markdown structure is ready.
+6. Custom URL schemes expose only packaged resources and images inside the document directory.
 
 External links open in the system browser. Executable and unknown URL schemes are blocked.
 
@@ -133,7 +149,7 @@ bash scripts/run-smoke-test.sh Tests/Fixtures/Showcase.md
 
 ## Current Scope
 
-MDReader intentionally does not provide editing, folder navigation, document outlines, search, tabs, automatic file refresh, Mermaid rendering, or automatic updates yet.
+MDReader intentionally does not provide WYSIWYG editing, split preview, folder navigation, document outlines, tabs, automatic external-file refresh, Mermaid rendering, or automatic updates yet.
 
 ## Contributing
 

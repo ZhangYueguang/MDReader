@@ -50,7 +50,10 @@ enum MDReaderTestRunner {
     static func main() throws {
         let tests = appMetadataTests()
             + appIconTests()
+            + editorModeTests()
             + markdownDocumentTests()
+            + markdownFormattingTests()
+            + markdownSyntaxHighlighterTests()
             + textDecoderTests()
             + localResourceResolverTests()
             + readerResourceLocatorTests()

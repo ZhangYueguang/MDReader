@@ -5,7 +5,6 @@ import UniformTypeIdentifiers
 public enum MarkdownDocumentError: LocalizedError {
     case notARegularFile
     case unsupportedEncoding
-    case readOnly
 
     public var errorDescription: String? {
         switch self {
@@ -13,43 +12,67 @@ public enum MarkdownDocumentError: LocalizedError {
             "Unable to read this Markdown file."
         case .unsupportedEncoding:
             "Unable to determine the file encoding."
-        case .readOnly:
-            "MDReader is read-only and never modifies the source file."
         }
     }
 }
 
-public struct MarkdownDocument: FileDocument, Sendable {
+public final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
+    public struct Snapshot: Sendable {
+        public let text: String
+        public let encoding: DetectedEncoding
+        public let hasByteOrderMark: Bool
+
+        public func encodedData() throws -> Data {
+            try encoding.encode(text, byteOrderMark: hasByteOrderMark)
+        }
+    }
+
     public static let readableContentTypes: [UTType] = [
         UTType(importedAs: "net.daringfireball.markdown")
     ]
-    public static let writableContentTypes: [UTType] = []
+    public static let writableContentTypes = readableContentTypes
 
-    public let text: String
-    public let sourceData: Data
-    public let encoding: DetectedEncoding
+    @Published public var text: String
+    @Published public private(set) var encoding: DetectedEncoding
+    @Published public private(set) var hasByteOrderMark: Bool
 
     public init(text: String) {
         self.text = text
-        self.sourceData = Data(text.utf8)
         self.encoding = .utf8
+        self.hasByteOrderMark = false
     }
 
     public init(data: Data) throws {
         let decoded = try TextDecoder.decode(data)
         self.text = decoded.text
-        self.sourceData = data
         self.encoding = decoded.encoding
+        self.hasByteOrderMark = decoded.hasByteOrderMark
     }
 
-    public init(configuration: ReadConfiguration) throws {
+    public convenience init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents else {
             throw MarkdownDocumentError.notARegularFile
         }
         try self.init(data: data)
     }
 
-    public func fileWrapper(configuration _: WriteConfiguration) throws -> FileWrapper {
-        throw MarkdownDocumentError.readOnly
+    public func snapshot(contentType _: UTType) throws -> Snapshot {
+        Snapshot(
+            text: text,
+            encoding: encoding,
+            hasByteOrderMark: hasByteOrderMark
+        )
+    }
+
+    public func fileWrapper(
+        snapshot: Snapshot,
+        configuration _: WriteConfiguration
+    ) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: try snapshot.encodedData())
+    }
+
+    public func convertToUTF8() {
+        encoding = .utf8
+        hasByteOrderMark = false
     }
 }

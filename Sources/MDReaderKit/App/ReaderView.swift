@@ -3,23 +3,85 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 public struct ReaderView: View {
-    private let document: MarkdownDocument
+    @ObservedObject private var document: MarkdownDocument
     private let fileURL: URL?
+    private let isEditable: Bool
     @State private var status: ReaderStatus = .loading
     @State private var readerIdentity = UUID()
+    @State private var mode: EditorMode = .defaultMode
+    @StateObject private var commandCenter = EditorCommandCenter()
 
-    public init(document: MarkdownDocument, fileURL: URL?) {
+    public init(
+        document: MarkdownDocument,
+        fileURL: URL?,
+        isEditable: Bool = true
+    ) {
         self.document = document
         self.fileURL = fileURL
+        self.isEditable = isEditable
     }
 
     public var body: some View {
+        VStack(spacing: 0) {
+            if mode.showsFormattingBar {
+                FormattingBar(perform: commandCenter.send)
+            }
+
+            if mode.showsSourceEditor {
+                MarkdownEditorView(
+                    text: $document.text,
+                    command: commandCenter.request
+                )
+            } else {
+                readerSurface
+            }
+        }
+        .frame(minWidth: 520, minHeight: 360)
+        .navigationTitle(fileURL?.lastPathComponent ?? "Untitled.md")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Picker("Mode", selection: $mode) {
+                    ForEach(EditorMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue)
+                            .tag(mode)
+                            .disabled(!mode.isAvailable(isEditable: isEditable))
+                    }
+                }
+                .pickerStyle(.segmented)
+                .fixedSize()
+                .onChange(of: mode) { oldMode, newMode in
+                    if oldMode == .edit, newMode == .read {
+                        status = .loading
+                        readerIdentity = UUID()
+                    }
+                }
+            }
+        }
+        .onChange(of: isEditable) { _, editable in
+            if !editable {
+                mode = .read
+            }
+        }
+        .onChange(of: mode) { _, newMode in
+            if newMode == .edit, !isEditable {
+                mode = .read
+            }
+        }
+        .onDrop(
+            of: [UTType.fileURL.identifier],
+            isTargeted: nil,
+            perform: openDroppedDocuments
+        )
+        .focusedSceneObject(document)
+    }
+
+    private var readerSurface: some View {
         ZStack {
             Color(nsColor: ReaderTheme.paperColor)
                 .ignoresSafeArea()
 
             ReaderWebView(
-                document: document,
+                source: document.text,
                 fileURL: fileURL,
                 onStatusChange: setStatus
             )
@@ -29,14 +91,7 @@ public struct ReaderView: View {
 
             statusOverlay
         }
-        .frame(minWidth: 520, minHeight: 360)
-        .navigationTitle(fileURL?.lastPathComponent ?? "MDReader")
         .animation(.easeOut(duration: 0.22), value: status)
-        .onDrop(
-            of: [UTType.fileURL.identifier],
-            isTargeted: nil,
-            perform: openDroppedDocuments
-        )
     }
 
     @ViewBuilder

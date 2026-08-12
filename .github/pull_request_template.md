@@ -10,7 +10,7 @@ Describe what changed and why.
 
 ## Checklist
 
-- [ ] The change preserves read-only source-file handling.
+- [ ] The change preserves coordinated saving and source-encoding behavior.
 - [ ] Behavior changes include tests.
 - [ ] Documentation and user-facing copy are in English.
 - [ ] No unrelated files are included.

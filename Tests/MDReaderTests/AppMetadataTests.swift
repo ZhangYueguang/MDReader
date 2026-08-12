@@ -2,7 +2,7 @@ import Foundation
 
 func appMetadataTests() -> [TestCase] {
     [
-        TestCase("Info.plist declares Markdown viewer") {
+        TestCase("Info.plist declares Markdown editor") {
         let repositoryRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
@@ -26,7 +26,8 @@ func appMetadataTests() -> [TestCase] {
                 plist["CFBundleIdentifier"] as? String,
                 "com.frank.mdreader"
             )
-            try expectEqual(firstType["CFBundleTypeRole"] as? String, "Viewer")
+            try expectEqual(plist["CFBundleDevelopmentRegion"] as? String, "en")
+            try expectEqual(firstType["CFBundleTypeRole"] as? String, "Editor")
             try expectEqual(
                 firstType["CFBundleTypeExtensions"] as? [String],
                 ["md", "markdown"]

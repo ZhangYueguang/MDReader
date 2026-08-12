@@ -8,12 +8,12 @@ public struct ReaderWebView: NSViewRepresentable {
     private let onStatusChange: (ReaderStatus) -> Void
 
     public init(
-        document: MarkdownDocument,
+        source: String,
         fileURL: URL?,
         onStatusChange: @escaping (ReaderStatus) -> Void
     ) {
         self.payload = ReaderPayload(
-            source: document.text,
+            source: source,
             title: fileURL?.lastPathComponent ?? "MDReader"
         )
         self.documentDirectory = fileURL?.deletingLastPathComponent()

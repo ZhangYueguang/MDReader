@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDevelopmentRegion</key>
-    <string>zh_CN</string>
+	<string>en</string>
     <key>CFBundleDisplayName</key>
     <string>MDReader</string>
     <key>CFBundleDocumentTypes</key>
@@ -16,8 +16,8 @@
             </array>
             <key>CFBundleTypeName</key>
             <string>Markdown Document</string>
-            <key>CFBundleTypeRole</key>
-            <string>Viewer</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
             <key>LSHandlerRank</key>
             <string>Alternate</string>
             <key>LSItemContentTypes</key>
@@ -39,9 +39,9 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>1.1.0</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSHighResolutionCapable</key>
