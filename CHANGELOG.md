@@ -2,6 +2,20 @@
 
 All notable changes to MDReader are documented in this file.
 
+## [1.2.0] - 2026-08-13
+
+### Added
+
+- Fully bundled Mermaid rendering for flowcharts, sequence diagrams, class and state diagrams, ER diagrams, Gantt charts, mind maps, and other Mermaid diagram families.
+- Automatic Mermaid detection for unlabelled fenced blocks whose first meaningful line is a supported diagram directive.
+- Responsive inline SVG presentation with light and dark themes aligned to the reader palette.
+- Block-local source fallback when a diagram cannot be rendered.
+
+### Changed
+
+- Diagram rendering failures no longer prevent the surrounding Markdown document from becoming ready.
+- The showcase document now exercises offline diagram rendering.
+
 ## [1.1.0] - 2026-08-12
 
 ### Added
@@ -33,3 +47,4 @@ All notable changes to MDReader are documented in this file.
 
 [1.0.0]: https://github.com/ZhangYueguang/MDReader/releases/tag/v1.0.0
 [1.1.0]: https://github.com/ZhangYueguang/MDReader/releases/tag/v1.1.0
+[1.2.0]: https://github.com/ZhangYueguang/MDReader/releases/tag/v1.2.0

@@ -92,6 +92,21 @@ A remote image, which should degrade locally when the network is unavailable:
 
 ![Remote example image](https://images.unsplash.com/photo-1456324504439-367cee3b3c32?auto=format&fit=crop&w=1200&q=70)
 
+## Diagrams
+
+Mermaid diagrams render locally as responsive inline SVG. The reader also recognizes unlabelled fenced blocks whose first meaningful line is a Mermaid diagram directive.
+
+```mermaid
+flowchart LR
+    A[Open Markdown] --> B{Content type}
+    B -->|Prose| C[Editorial rendering]
+    B -->|Math| D[MathJax]
+    B -->|Diagram| E[Mermaid]
+    C --> F[Ready]
+    D --> F
+    E --> F
+```
+
 ## Footnotes and Closing
 
 Footnotes should appear at the end of the document and preserve accessible return links.[^renderer]

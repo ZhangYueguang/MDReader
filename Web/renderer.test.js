@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {renderMarkdown} from './renderer.js'
+import {JSDOM} from 'jsdom'
 
 describe('renderMarkdown', () => {
   it('renders GFM, footnotes, highlighted code, and front matter', async () => {
@@ -87,6 +88,52 @@ x_0\sim p_0=\mathcal N(0,I).
     const html = await renderMarkdown('Use `\\(\\mu(x_t,t)\\)` as an example.')
 
     expect(html).toContain(String.raw`<code>\(\mu(x_t,t)\)</code>`)
+  })
+
+  it('turns an explicit Mermaid fence into a diagram placeholder', async () => {
+    const html = await renderMarkdown([
+      '```mermaid',
+      'sequenceDiagram',
+      '  Reader->>Renderer: Render',
+      '```'
+    ].join('\n'))
+    const document = new JSDOM(html).window.document
+    const diagram = document.querySelector('.mermaid-diagram')
+
+    expect(diagram?.getAttribute('data-diagram-source')).toBe(
+      'sequenceDiagram\n  Reader->>Renderer: Render'
+    )
+    expect(document.querySelector('pre')).toBeNull()
+  })
+
+  it('recognizes an unlabelled fenced Mermaid flowchart', async () => {
+    const html = await renderMarkdown([
+      '```',
+      'flowchart TD',
+      '  A[Read] --> B[Understand]',
+      '```'
+    ].join('\n'))
+    const document = new JSDOM(html).window.document
+
+    expect(document.querySelector('.mermaid-diagram')?.getAttribute(
+      'data-diagram-source'
+    )).toBe('flowchart TD\n  A[Read] --> B[Understand]')
+  })
+
+  it('keeps ordinary unlabelled and language-tagged code as code blocks', async () => {
+    const html = await renderMarkdown([
+      '```',
+      'const flowchart = true',
+      '```',
+      '',
+      '```swift',
+      'flowchart TD',
+      '```'
+    ].join('\n'))
+    const document = new JSDOM(html).window.document
+
+    expect(document.querySelectorAll('.mermaid-diagram')).toHaveLength(0)
+    expect(document.querySelectorAll('pre')).toHaveLength(2)
   })
 
   it('removes executable content and rewrites relative images', async () => {

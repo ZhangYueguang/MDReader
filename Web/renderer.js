@@ -9,6 +9,8 @@ import remarkMath from 'remark-math'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import {unified} from 'unified'
+import {rehypeMermaidBlocks} from './diagram-source.js'
+import {renderMermaidDiagrams} from './mermaid-renderer.js'
 
 const mathMLTags = [
   'math', 'semantics', 'annotation', 'annotation-xml', 'mi', 'mn', 'mo',
@@ -53,7 +55,8 @@ const sanitizeSchema = {
     section: [...(defaultSchema.attributes.section || []), 'className'],
     a: [...(defaultSchema.attributes.a || []), 'dataFootnoteRef', 'ariaDescribedBy'],
     aside: ['className'],
-    dl: ['className']
+    dl: ['className'],
+    div: [...(defaultSchema.attributes.div || []), 'dataDiagramSource']
   },
   protocols: {
     ...defaultSchema.protocols,
@@ -212,6 +215,7 @@ function createProcessor() {
       handlers: {yaml: frontmatterHandler}
     })
     .use(rehypeRaw)
+    .use(rehypeMermaidBlocks)
     .use(rehypeSanitize, sanitizeSchema)
     .use(rehypeMathjaxBrowser, {
       tex: {
@@ -229,12 +233,13 @@ export async function renderMarkdown(source) {
   return String(result)
 }
 
-export async function renderDocument({source, title}) {
+export async function renderDocument({source, title, mermaidAPI}) {
   const content = document.getElementById('content')
   if (!content) throw new Error('The reader page is not ready.')
   document.title = title || 'MDReader'
   content.innerHTML = await renderMarkdown(source)
   installImageFallbacks(content)
+  await renderMermaidDiagrams(content, {mermaidAPI})
   const mathJax = globalThis.MathJax
   if (!mathJax?.startup?.promise || typeof mathJax.typesetPromise !== 'function') {
     throw new Error('The math typesetting component failed to start.')

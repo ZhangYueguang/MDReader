@@ -197,6 +197,7 @@ blockquote,
 pre,
 table,
 .frontmatter,
+.mermaid-diagram,
 mjx-container[display="true"] {
   margin-block: 0 var(--space-6);
 }
@@ -319,6 +320,52 @@ pre code {
   display: block;
   min-width: max-content;
   background: transparent;
+}
+
+.mermaid-diagram {
+  width: 100%;
+  overflow-x: auto;
+  padding: clamp(1rem, 3vw, 2rem);
+  border-block: 1px solid var(--rule);
+  border-radius: 0.35rem;
+  background: color-mix(in oklch, var(--technical), var(--paper) 34%);
+  -webkit-overflow-scrolling: touch;
+}
+
+.mermaid-diagram__canvas {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.mermaid-diagram__canvas svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+.mermaid-diagram--error {
+  color: var(--error);
+}
+
+.mermaid-diagram__error {
+  margin: 0 0 var(--space-3);
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.mermaid-diagram--error pre {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
 }
 
 .hljs-keyword,

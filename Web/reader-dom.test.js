@@ -92,6 +92,31 @@ describe('reader host', () => {
       .toContain('Diagram')
   })
 
+  it('reveals the document when one diagram cannot be rendered', async () => {
+    const dom = new JSDOM(
+      '<!doctype html><html data-state="loading"><body><article id="content"></article></body></html>',
+      {url: 'https://mdreader.test/'}
+    )
+    globalThis.document = dom.window.document
+    globalThis.MathJax = {
+      startup: {promise: Promise.resolve()},
+      typesetPromise: vi.fn(async () => {})
+    }
+
+    await renderDocument({
+      source: '```mermaid\nnot a diagram\n```',
+      title: 'Diagram.md',
+      mermaidAPI: {
+        initialize: vi.fn(),
+        render: vi.fn(async () => { throw new Error('Parse error') })
+      }
+    })
+
+    expect(dom.window.document.documentElement.dataset.state).toBe('ready')
+    expect(dom.window.document.querySelector('.mermaid-diagram--error code')?.textContent)
+      .toBe('not a diagram')
+  })
+
   it('does not reveal the document when the math engine is unavailable', async () => {
     const dom = new JSDOM(
       '<!doctype html><html data-state="loading"><body><article id="content"></article></body></html>',

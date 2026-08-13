@@ -22,6 +22,7 @@ MDReader presents local Markdown files accurately and beautifully, then lets you
 
 - CommonMark and GitHub Flavored Markdown, including tables, task lists, strikethrough, autolinks, and footnotes.
 - Inline and display math through bundled MathJax, with support for TeX and MathML.
+- Offline Mermaid rendering for flowcharts, sequence diagrams, class and state diagrams, ER diagrams, Gantt charts, mind maps, and other Mermaid chart types.
 - Syntax highlighting for fenced code blocks.
 - YAML front matter rendered as quiet document metadata.
 - Local relative images and remote images.
@@ -37,7 +38,7 @@ MDReader presents local Markdown files accurately and beautifully, then lets you
 
 ## Download
 
-**[Download MDReader 1.1.0 for macOS (.dmg)](https://github.com/ZhangYueguang/MDReader/releases/latest/download/MDReader-1.1.0.dmg)**
+**[Download MDReader 1.2.0 for macOS (.dmg)](https://github.com/ZhangYueguang/MDReader/releases/latest/download/MDReader-1.2.0.dmg)**
 
 [View release notes and previous versions](https://github.com/ZhangYueguang/MDReader/releases).
 
@@ -45,7 +46,7 @@ The prebuilt application requires macOS 14 or later. You do not need Swift, Node
 
 ### Install
 
-1. Download `MDReader-1.1.0.dmg` from the latest release.
+1. Download `MDReader-1.2.0.dmg` from the latest release.
 2. Open the disk image.
 3. Drag **MDReader** onto the **Applications** shortcut.
 4. Eject the MDReader disk image.
@@ -111,6 +112,21 @@ MDReader participates in the native macOS document lifecycle. Changes are autosa
 
 Existing UTF-8, UTF-16, and GB18030/GBK files keep their original encoding and byte-order-mark style whenever they are saved. Use **File → Convert to UTF-8** when you intentionally want UTF-8 output.
 
+## Diagrams
+
+Use a fenced `mermaid` block to render a diagram:
+
+````markdown
+```mermaid
+flowchart LR
+    A[Open Markdown] --> B[Read clearly]
+```
+````
+
+MDReader bundles Mermaid and renders its diagram families entirely offline. Unlabelled fenced blocks are also recognized when their first meaningful line begins with a Mermaid directive such as `flowchart`, `sequenceDiagram`, `classDiagram`, or `erDiagram`. Ordinary code blocks remain code.
+
+If an individual diagram contains invalid syntax, MDReader keeps the rest of the document readable and shows the original diagram source at that location.
+
 ## Architecture
 
 MDReader uses a SwiftUI document-based shell, a native TextKit editor, and a tightly controlled `WKWebView` rendering surface.
@@ -119,8 +135,9 @@ MDReader uses a SwiftUI document-based shell, a native TextKit editor, and a tig
 2. TextKit provides source editing, selection-based formatting, undo, find, and lightweight syntax highlighting.
 3. A bundled unified/remark pipeline parses Markdown, applies GFM extensions, and sanitizes embedded HTML.
 4. Highlight.js-compatible output styles code blocks.
-5. Bundled MathJax typesets TeX and MathML after the Markdown structure is ready.
-6. Custom URL schemes expose only packaged resources and images inside the document directory.
+5. Bundled Mermaid converts diagram blocks to responsive inline SVG with local source fallback on errors.
+6. Bundled MathJax typesets TeX and MathML after the Markdown structure is ready.
+7. Custom URL schemes expose only packaged resources and images inside the document directory.
 
 External links open in the system browser. Executable and unknown URL schemes are blocked.
 
@@ -149,7 +166,7 @@ bash scripts/run-smoke-test.sh Tests/Fixtures/Showcase.md
 
 ## Current Scope
 
-MDReader intentionally does not provide WYSIWYG editing, split preview, folder navigation, document outlines, tabs, automatic external-file refresh, Mermaid rendering, or automatic updates yet.
+MDReader intentionally does not provide WYSIWYG editing, split preview, folder navigation, document outlines, tabs, automatic external-file refresh, non-Mermaid diagram languages, or automatic updates yet.
 
 ## Contributing
 
