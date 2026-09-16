@@ -34,7 +34,7 @@ public enum NavigationPolicy {
             }
             return .allow
         case "mdreader-file":
-            return !isMainFrame && url.host == "document" ? .allow : .cancel
+            return !isMainFrame && ["document", "image"].contains(url.host ?? "") ? .allow : .cancel
         case "http", "https":
             return isMainFrame ? .openExternally(url) : .allow
         case "mailto":

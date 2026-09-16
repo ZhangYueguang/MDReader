@@ -62,6 +62,12 @@ public struct ReaderView: View {
                 mode = .read
             }
         }
+        .onChange(of: fileURL) { _, _ in
+            // Saving or moving a document changes the base for relative images.
+            // Recreate the scheme handler instead of keeping the previous folder.
+            status = .loading
+            readerIdentity = UUID()
+        }
         .onChange(of: mode) { _, newMode in
             if newMode == .edit, !isEditable {
                 mode = .read

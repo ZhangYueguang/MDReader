@@ -51,6 +51,7 @@ const sanitizeSchema = {
       ['className', /^language-./, 'math-inline', 'math-display']
     ],
     input: ['type', 'checked', 'disabled'],
+    img: [...(defaultSchema.attributes.img || []), 'dataBlockedSource'],
     ol: [...(defaultSchema.attributes.ol || []), 'className'],
     section: [...(defaultSchema.attributes.section || []), 'className'],
     a: [...(defaultSchema.attributes.a || []), 'dataFootnoteRef', 'ariaDescribedBy'],
@@ -61,7 +62,7 @@ const sanitizeSchema = {
   protocols: {
     ...defaultSchema.protocols,
     href: ['http', 'https', 'mailto'],
-    src: ['http', 'https', 'mdreader-file']
+    src: ['http', 'https', 'mdreader-file', 'data']
   }
 }
 
@@ -96,20 +97,54 @@ function frontmatterHandler(_state, node) {
 function rehypeRelativeImages() {
   return tree => {
     walk(tree, node => {
+      if (node.tagName !== 'img' && /^data:/i.test(node.properties?.src || '')) {
+        delete node.properties.src
+      }
       if (node.type !== 'element' || node.tagName !== 'img') return
-      const source = node.properties?.src
-      if (typeof source !== 'string' || isExternalURL(source)) return
-      if (source.startsWith('/') || source.startsWith('~')) {
+      let source = node.properties?.src
+      if (typeof source !== 'string') return
+      // Only passive raster data is accepted; never allow arbitrary data documents.
+      if (/^data:/i.test(source)) {
+        if (!/^data:image\/(?:png|jpeg|gif|webp|avif|bmp|x-icon);base64,[a-z\d+/=\s]+$/i.test(source)) {
+          delete node.properties.src
+          node.properties.dataBlockedSource = 'Unsupported embedded image'
+        }
+        return
+      }
+      if (source.startsWith('//')) {
+        node.properties.src = `https:${source}`
+        return
+      }
+      if (/^file:/i.test(source)) {
+        try {
+          const url = new URL(source)
+          if (url.hostname && url.hostname !== 'localhost') throw new Error('Non-local file URL')
+          source = url.pathname + url.search + url.hash
+        } catch {
+          delete node.properties.src
+          node.properties.dataBlockedSource = 'Unsupported file URL'
+          return
+        }
+      }
+      if (isExternalURL(source)) return
+      if (source.startsWith('~')) {
         delete node.properties.src
         node.properties.dataBlockedSource = source
         return
       }
+      // Markdown already URL-encodes destinations, whereas raw HTML may not.
+      // Keep URI separators and valid escapes intact, encoding exactly once.
       const normalized = source.replaceAll('\\', '/')
-      const encoded = normalized
+      const suffixIndex = normalized.search(/[?#]/)
+      const path = suffixIndex < 0 ? normalized : normalized.slice(0, suffixIndex)
+      const suffix = suffixIndex < 0 ? '' : normalized.slice(suffixIndex)
+      const encoded = path
         .split('/')
-        .map(segment => encodeURIComponent(segment))
+        .map(segment => encodeURIComponent(segment).replace(/%25([\da-f]{2})/gi, '%$1'))
         .join('/')
-      node.properties.src = `mdreader-file://document/${encoded}`
+      node.properties.src = source.startsWith('/')
+        ? `mdreader-file://image${encoded}${suffix}`
+        : `mdreader-file://document/${encoded}${suffix}`
     })
   }
 }
@@ -216,6 +251,7 @@ function createProcessor() {
     })
     .use(rehypeRaw)
     .use(rehypeMermaidBlocks)
+    .use(rehypeRelativeImages)
     .use(rehypeSanitize, sanitizeSchema)
     .use(rehypeMathjaxBrowser, {
       tex: {
@@ -224,7 +260,6 @@ function createProcessor() {
       }
     })
     .use(rehypeHighlight, {detect: false, plainText: ['math']})
-    .use(rehypeRelativeImages)
     .use(rehypeStringify)
 }
 
@@ -251,19 +286,23 @@ export async function renderDocument({source, title, mermaidAPI}) {
 
 function installImageFallbacks(content) {
   for (const image of content.querySelectorAll('img')) {
-    image.addEventListener('error', () => {
+    const showFallback = () => {
       const fallback = document.createElement('span')
       fallback.className = 'broken-image'
       fallback.setAttribute('role', 'img')
       const label = image.getAttribute('alt')?.trim() || 'Untitled image'
-      const source = image.getAttribute('src')
+      const source = image.getAttribute('src')?.replace(/^data:.*/s, 'Embedded image')
         || image.getAttribute('data-blocked-source')
         || ''
       fallback.textContent = source
         ? `Image could not be displayed · ${label} · ${source}`
         : `Image could not be displayed · ${label}`
       image.replaceWith(fallback)
-    }, {once: true})
+    }
+    image.addEventListener('error', showFallback, {once: true})
+    if (!image.getAttribute('src') || (image.complete && image.naturalWidth === 0)) {
+      showFallback()
+    }
   }
 }
 

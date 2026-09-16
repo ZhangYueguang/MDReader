@@ -25,7 +25,7 @@ MDReader presents local Markdown files accurately and beautifully, then lets you
 - Offline Mermaid rendering for flowcharts, sequence diagrams, class and state diagrams, ER diagrams, Gantt charts, mind maps, and other Mermaid chart types.
 - Syntax highlighting for fenced code blocks.
 - YAML front matter rendered as quiet document metadata.
-- Local relative images and remote images.
+- Local relative images, absolute raster image paths, and remote images.
 - UTF-8, UTF-16, and GB18030/GBK text decoding.
 - One independent window per document.
 - A fluid reading column that grows with the window while preserving comfortable line length.
@@ -112,6 +112,23 @@ MDReader participates in the native macOS document lifecycle. Changes are autosa
 
 Existing UTF-8, UTF-16, and GB18030/GBK files keep their original encoding and byte-order-mark style whenever they are saved. Use **File → Convert to UTF-8** when you intentionally want UTF-8 output.
 
+## Images
+
+Markdown images (including reference-style images) and HTML `<img>` elements support local relative paths, HTTP/HTTPS URLs, and base64-embedded raster images. Chinese filenames, spaces, and URL-encoded filenames are supported. Protocol-relative network URLs (`//host/image.png`) use HTTPS.
+
+For portable documents, keep local images beside the Markdown file or in a subfolder, for example `![Plot](<images/plot 1.png>)`. Absolute image paths such as `![Plot](</Users/me/My Project/plot.png>)` and local `file:///` image URLs are also supported, including images outside the document folder. The absolute-path loader verifies actual raster image content (not just the filename extension), limits each file to 64 MiB, and never serves arbitrary text, HTML, or script files. SVG images should use relative paths within the document folder.
+
+Use `%23`, `%3F`, and `%25` for literal `#`, `?`, and `%` characters in image URLs. Relative paths cannot escape the document folder. Missing or unsupported images show a local fallback without hiding the rest of the document.
+
+To test actual image decoding in the bundled WebKit reader:
+
+```sh
+npm run build:web
+swift run MDReaderTests --web-images
+# Optional online image check:
+swift run MDReaderTests --web-images --remote-images
+```
+
 ## Diagrams
 
 Use a fenced `mermaid` block to render a diagram:
@@ -137,7 +154,7 @@ MDReader uses a SwiftUI document-based shell, a native TextKit editor, and a tig
 4. Highlight.js-compatible output styles code blocks.
 5. Bundled Mermaid converts diagram blocks to responsive inline SVG with local source fallback on errors.
 6. Bundled MathJax typesets TeX and MathML after the Markdown structure is ready.
-7. Custom URL schemes expose only packaged resources and images inside the document directory.
+7. Custom URL schemes keep bundled resources and relative document resources directory-scoped. A separate absolute-image route verifies raster image content before serving bytes and cannot be opened as a main-frame page.
 
 External links open in the system browser. Executable and unknown URL schemes are blocked.
 

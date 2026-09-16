@@ -12,6 +12,15 @@ afterEach(() => {
 })
 
 describe('reader host', () => {
+  it('shows a fallback immediately for removed or missing image sources', async () => {
+    const dom = new JSDOM('<article id="content"></article>')
+    globalThis.document = dom.window.document
+    globalThis.MathJax = {startup: {promise: Promise.resolve()}, typesetPromise: vi.fn(async () => {})}
+    await renderDocument({source: '<img src="~/private/missing.png" alt="Blocked">\n\n<img alt="Missing">'})
+    expect(dom.window.document.querySelectorAll('.broken-image')).toHaveLength(2)
+    expect(dom.window.document.querySelector('img')).toBeNull()
+  })
+
   it('uses only local application scripts and exposes loading and content regions', async () => {
     const html = await readFile(
       new URL('../Sources/MDReaderKit/Resources/Web/index.html', import.meta.url),

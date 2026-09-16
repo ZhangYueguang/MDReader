@@ -56,6 +56,7 @@ enum MDReaderTestRunner {
             + markdownSyntaxHighlighterTests()
             + textDecoderTests()
             + localResourceResolverTests()
+            + localImageResourceTests()
             + readerResourceLocatorTests()
             + readerBridgeTests()
             + readerThemeTests()
@@ -64,5 +65,8 @@ enum MDReaderTestRunner {
             print("PASS \(test.name)")
         }
         print("\(tests.count) tests passed")
+        if CommandLine.arguments.contains("--web-images") {
+            try MainActor.assumeIsolated { try runReaderImageIntegrationTest() }
+        }
     }
 }

@@ -3,6 +3,37 @@ import {renderMarkdown} from './renderer.js'
 import {JSDOM} from 'jsdom'
 
 describe('renderMarkdown', () => {
+  it.each([
+    ['![x](<images/中文 图.png>)', 'mdreader-file://document/images/%E4%B8%AD%E6%96%87%20%E5%9B%BE.png'],
+    ['![x](images/a%20b.png)', 'mdreader-file://document/images/a%20b.png'],
+    ['![x](</Users/test/My Project/中文 图.png>)', 'mdreader-file://image/Users/test/My%20Project/%E4%B8%AD%E6%96%87%20%E5%9B%BE.png'],
+    ['<img src="/Users/test/My Project/picture.png">', 'mdreader-file://image/Users/test/My%20Project/picture.png'],
+    ['![x](file:///Users/test/a%20b.png)', 'mdreader-file://image/Users/test/a%20b.png'],
+    ['![x](file://localhost/Users/test/a%2520.png)', 'mdreader-file://image/Users/test/a%2520.png'],
+    ['<img src="images/中文 图.png">', 'mdreader-file://document/images/%E4%B8%AD%E6%96%87%20%E5%9B%BE.png'],
+    ['![x](images/100%25%23%3F.png)', 'mdreader-file://document/images/100%25%23%3F.png'],
+    ['![x](images/a.png?v=1#preview)', 'mdreader-file://document/images/a.png?v=1#preview'],
+    ['![x](//example.com/a.png)', 'https://example.com/a.png'],
+    ['![x][pic]\n\n[pic]: images/a%20b.png', 'mdreader-file://document/images/a%20b.png']
+  ])('normalizes image URLs exactly once: %s', async (markdown, expected) => {
+    const document = new JSDOM(await renderMarkdown(markdown)).window.document
+    expect(document.querySelector('img').getAttribute('src')).toBe(expected)
+  })
+
+  it('allows embedded raster images without permitting active data documents', async () => {
+    const raster = 'data:image/png;base64,iVBORw0KGgo='
+    const document = new JSDOM(await renderMarkdown([
+      `![embedded](${raster})`,
+      '<img src="data:text/html;base64,PHNjcmlwdD4=">',
+      '<img src="data:image/svg+xml;base64,PHN2Zz4=">',
+      '<img src="~/private.png">',
+      '<img src="file://remote-server/private.png">'
+    ].join('\n\n'))).window.document
+    const images = [...document.querySelectorAll('img')]
+    expect(images[0].getAttribute('src')).toBe(raster)
+    expect(images.slice(1).every(image => !image.hasAttribute('src'))).toBe(true)
+  })
+
   it('renders GFM, footnotes, highlighted code, and front matter', async () => {
     const markdown = [
       '---',

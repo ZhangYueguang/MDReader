@@ -2,6 +2,16 @@
 
 All notable changes to MDReader are documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- Render absolute local raster image paths and local `file:///` image URLs, including references outside the Markdown folder; validate image content before serving bytes.
+- Normalize image URL encoding exactly once across Markdown, HTML, and the native file loader, preserving escaped filename characters and URL suffixes.
+- Render base64-embedded raster images and resolve protocol-relative network images over HTTPS.
+- Display missing-source image fallbacks immediately and refresh the local image directory after a document's file URL changes.
+- Add native WebKit image-decoding coverage alongside image URL and fallback regression tests.
+
 ## [1.2.0] - 2026-08-13
 
 ### Added
